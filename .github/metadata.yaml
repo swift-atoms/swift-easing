@@ -1,0 +1,9 @@
+description: "Easing curves for Swift: progress from elapsed time and duration, as a timing curve, a spring or a named shape."
+topics:
+  - primitives
+  - easing
+  - animation
+  - interpolation
+homepage: "https://swift-institute.org"
+readme:
+  family: E
