@@ -89,6 +89,30 @@ extension Easing {
         })
     }
 
+    /// Named cubic-Bézier timing curves.
+    public static var stroke: Self { .bezier(0.35, 0, 0.45, 1) }
+    public static var glide: Self { .bezier(0.42, 0, 0.58, 1) }
+    public static var settle: Self { .bezier(0.16, 1, 0.3, 1) }
+    public static var depart: Self { .bezier(0.5, 0, 0.75, 0.6) }
+
+    /// Smooth Hermite interpolation over `start...end` at `value`, clamped to 0...1.
+    public static func smoothstep(from start: Scalar, to end: Scalar, at value: Scalar) -> Scalar {
+        let u = clamped((value - start) / (end - start))
+        return u * u * (3 - 2 * u)
+    }
+
+    /// Evaluates the easing at `time` over `[start, start + duration]`, returning 0 before and 1 after.
+    public func evaluated(at time: Scalar, from start: Scalar, over duration: Scalar) -> Scalar {
+        guard time > start else { return 0 }
+        guard time < start + duration else { return 1 }
+        return progress(time - start, duration)
+    }
+
+    /// Clamps `value` to `range`.
+    public static func clamped(_ value: Scalar, to range: ClosedRange<Scalar> = 0...1) -> Scalar {
+        Swift.min(Swift.max(value, range.lowerBound), range.upperBound)
+    }
+
     /// The fraction to a whole power of at least one, by multiplication alone: slow to start for a power
     /// above one. ``reversed`` of it is quick to start and ``symmetric`` slow at both ends.
     public static func power(_ exponent: Cardinal) -> Self {
@@ -123,5 +147,13 @@ extension Easing {
         var result: Scalar = 1
         (0..<Int(bitPattern: power)).forEach { _ in result *= value }
         return result
+    }
+}
+
+extension Easing where Scalar: Exponential.`Protocol` {
+    /// Gaussian bell curve centered at `center` with scale `width`: exp(-((time - center) / width)²).
+    public static func gaussian(at time: Scalar, center: Scalar, width: Scalar) -> Scalar {
+        let offset = (time - center) / width
+        return Scalar.exp(-offset * offset)
     }
 }
